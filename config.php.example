@@ -1,0 +1,25 @@
+<?php
+/**
+ * Wunderground Proxy Configuration
+ *
+ * Copy this file to config.php and fill in your values.
+ * Never commit config.php to version control — it contains secrets.
+ *
+ * WX_API_KEY:
+ *   A 32-character hex string obtained from:
+ *   wunderground.com → My Profile → Member Settings → API Keys
+ *   Note: this is NOT the same as the station upload password.
+ *
+ * WX_STATION_ID:
+ *   Your personal weather station ID, e.g. "IHUDDI4".
+ *   Find it at wunderground.com/wundermap or in your station settings.
+ *
+ * WX_UNITS:
+ *   "m"  = metric  (°C, km/h, hPa, mm)
+ *   "e"  = imperial (°F, mph, inHg, in)
+ *   "h"  = hybrid  (°F, km/h)
+ */
+
+define('WX_API_KEY',    'YOUR_32_CHARACTER_API_KEY_HERE');
+define('WX_STATION_ID', 'YOUR_STATION_ID_HERE');
+define('WX_UNITS',      'm');

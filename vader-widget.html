@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Väderstation</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: transparent;
+  }
+
+  #wx-widget {
+    max-width: 320px;
+    background: #1a1a2e;
+    border-radius: 16px;
+    padding: 20px;
+    color: #eee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  #wx-loading {
+    text-align: center;
+    padding: 20px;
+    color: #aaa;
+  }
+
+  #wx-content {
+    display: none;
+  }
+
+  .wx-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .wx-therm {
+    position: relative;
+    width: 36px;
+    height: 110px;
+    flex-shrink: 0;
+  }
+
+  .wx-therm-tube {
+    position: absolute;
+    left: 11px;
+    top: 0;
+    width: 14px;
+    height: 85px;
+    background: #333;
+    border-radius: 7px 7px 0 0;
+    overflow: hidden;
+    border: 2px solid #555;
+  }
+
+  #wx-thermbar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to top, #ff4444, #ff9900);
+    border-radius: 5px;
+    transition: height 0.8s ease;
+    height: 0%;
+  }
+
+  .wx-therm-bulb {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 36px;
+    height: 36px;
+    background: #ff4444;
+    border-radius: 50%;
+    border: 2px solid #ff6666;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+  }
+
+  .wx-therm-ticks {
+    position: absolute;
+    left: 27px;
+    top: 0;
+    height: 85px;
+    font-size: 8px;
+    color: #aaa;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  #wx-temp {
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+
+  #wx-feels {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+
+  #wx-station {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  .wx-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .wx-card {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .wx-card-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .wx-card-value {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  #wx-hum      { color: #60a5fa; }
+  #wx-wind     { color: #34d399; }
+  #wx-pressure { color: #a78bfa; font-size: 20px; }
+  #wx-rain     { color: #38bdf8; }
+
+  #wx-winddir {
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  #wx-time {
+    font-size: 10px;
+    color: #444;
+    text-align: right;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="wx-widget">
+  <div id="wx-loading">Hämtar väderdata…</div>
+  <div id="wx-content">
+
+    <div class="wx-top">
+      <div class="wx-therm">
+        <div class="wx-therm-tube">
+          <div id="wx-thermbar"></div>
+        </div>
+        <div class="wx-therm-bulb"></div>
+        <div class="wx-therm-ticks">
+          <span>40°</span><span>20°</span><span>0°</span><span>-20°</span>
+        </div>
+      </div>
+
+      <div>
+        <div id="wx-temp"></div>
+        <div id="wx-feels"></div>
+        <div id="wx-station"></div>
+      </div>
+    </div>
+
+    <div class="wx-grid">
+      <div class="wx-card">
+        <div class="wx-card-label">Luftfuktighet</div>
+        <div id="wx-hum" class="wx-card-value"></div>
+      </div>
+      <div class="wx-card">
+        <div class="wx-card-label">Vind</div>
+        <div id="wx-wind" class="wx-card-value"></div>
+        <div id="wx-winddir"></div>
+      </div>
+      <div class="wx-card">
+        <div class="wx-card-label">Lufttryck</div>
+        <div id="wx-pressure" class="wx-card-value"></div>
+      </div>
+      <div class="wx-card">
+        <div class="wx-card-label">Dagsregn</div>
+        <div id="wx-rain" class="wx-card-value"></div>
+      </div>
+    </div>
+
+    <div id="wx-time"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // URL to your wunderground-proxy.php — update this to match your setup
+  var PROXY_URL = "http://YOUR-SYNOLOGY-IP/wunderground-proxy.php";
+
+  // Auto-refresh interval in milliseconds (default: 10 minutes)
+  var REFRESH_INTERVAL = 10 * 60 * 1000;
+
+  function windDirText(deg) {
+    var dirs = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSV","SV","VSV","V","VNV","NV","NNV"];
+    return dirs[Math.round(deg / 22.5) % 16];
+  }
+
+  function thermHeight(temp) {
+    // Scale: -20°C = 0%, 40°C = 100%
+    var pct = (temp + 20) / 60 * 100;
+    return Math.min(100, Math.max(0, pct)) + "%";
+  }
+
+  function loadWeather() {
+    fetch(PROXY_URL)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        var obs = data.observations && data.observations[0];
+        if (!obs) throw new Error("No observation data in response");
+
+        var m    = obs.metric;
+        var temp = m.temp;
+
+        document.getElementById("wx-temp").textContent     = temp + "°C";
+        document.getElementById("wx-feels").textContent    = "Känns som " + m.heatIndex + "°C";
+        document.getElementById("wx-station").textContent  = obs.neighborhood || obs.stationID;
+        document.getElementById("wx-hum").textContent      = obs.humidity + "%";
+        document.getElementById("wx-wind").textContent     = m.windSpeed + " km/h";
+        document.getElementById("wx-winddir").textContent  = windDirText(obs.winddir);
+        document.getElementById("wx-pressure").textContent = m.pressure + " hPa";
+        document.getElementById("wx-rain").textContent     = m.precipTotal + " mm";
+        document.getElementById("wx-thermbar").style.height = thermHeight(temp);
+
+        var tidDel = (obs.obsTimeLocal || "").split(" ")[1];
+        document.getElementById("wx-time").textContent = tidDel
+          ? "Uppdaterad " + tidDel.substring(0, 5)
+          : "";
+
+        document.getElementById("wx-loading").style.display = "none";
+        document.getElementById("wx-content").style.display = "block";
+      })
+      .catch(function (e) {
+        document.getElementById("wx-loading").textContent = "⚠ Kunde inte hämta väderdata";
+        console.error("Weather widget error:", e);
+      });
+  }
+
+  loadWeather();
+
+  if (REFRESH_INTERVAL > 0) {
+    setInterval(loadWeather, REFRESH_INTERVAL);
+  }
+})();
+</script>
+
+</body>
+</html>
