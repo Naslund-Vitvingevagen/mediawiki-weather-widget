@@ -10,17 +10,14 @@ jobs:
     runs-on: [self-hosted, synology]
 
     steps:
-      - name: Hämta kod från GitHub
-        uses: actions/checkout@v4
-
-      - name: Kopiera proxy och widget till webbroot
+      - name: Hämta och deploya filer direkt från GitHub
         run: |
-          cp wunderground-proxy.php /mnt/web/wunderground-proxy.php
-          cp vader-widget.html /mnt/web/vader-widget.html
-          echo "✅ Webbfiler kopierade"
+          BASE="https://raw.githubusercontent.com/andrnas/mediawiki-weather-widget/main"
+          curl -sf "$BASE/wunderground-proxy.php" -o /mnt/web/wunderground-proxy.php
+          curl -sf "$BASE/vader-widget.html" -o /mnt/web/vader-widget.html
+          echo "✅ Deploy klar"
 
-      - name: Verifiera att filerna finns
+      - name: Verifiera
         run: |
           ls -la /mnt/web/wunderground-proxy.php
           ls -la /mnt/web/vader-widget.html
-          echo "✅ Deploy klar"
