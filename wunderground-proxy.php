@@ -17,7 +17,7 @@
  * Configuration:
  *   Copy config.php.example to config.php and fill in your values.
  */
-
+//lägger till en kommentar för att testa
 require_once __DIR__ . '/config.php';
 
 header("Access-Control-Allow-Origin: *");
