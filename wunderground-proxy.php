@@ -57,6 +57,6 @@ if ($data !== false && strpos($statusLine, '200') !== false) {
     echo json_encode([
         "error"  => "Could not fetch weather data",
         "status" => $statusLine
-    ]);
+    ]); 
 }
 ?>
