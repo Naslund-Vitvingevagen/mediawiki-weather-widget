@@ -55,7 +55,7 @@ if ($data !== false && strpos($statusLine, '200') !== false) {
     // No cache and no data
     http_response_code(502);
     echo json_encode([
-        "error"  => "Could not fetch weather data",
+        "error"  => "Could not fetch weather data",  
         "status" => $statusLine
     ]); 
 }
