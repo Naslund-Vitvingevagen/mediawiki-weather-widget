@@ -253,7 +253,7 @@
           : "";
 
         document.getElementById("wx-loading").style.display = "none";
-        document.getElementById("wx-content").style.display = "block"; 
+        document.getElementById("wx-content").style.display = "block";
       })
       .catch(function (e) {
         document.getElementById("wx-loading").textContent = "⚠ Kunde inte hämta väderdata" + (e.message ? ": " + e.message : "");
