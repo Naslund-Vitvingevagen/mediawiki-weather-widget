@@ -9,12 +9,14 @@ jobs:
   deploy:
     runs-on: [self-hosted, synology]
 
+    
+
     steps:
       - name: Hämta och deploya filer direkt från GitHub
         run: |
           BASE="https://raw.githubusercontent.com/Naslund-Vitvingevagen/mediawiki-weather-widget/main"
-          curl -sf "$BASE/wunderground-proxy.php" -o /mnt/web/wunderground-proxy.php
-          curl -sf "$BASE/vader-widget.html" -o /mnt/web/vader-widget.html
+          curl -vf "$BASE/wunderground-proxy.php" -o /mnt/web/wunderground-proxy.php
+          curl -vf "$BASE/vader-widget.html" -o /mnt/web/vader-widget.html
           echo "✅ Deploy klar"
 
       - name: Verifiera
