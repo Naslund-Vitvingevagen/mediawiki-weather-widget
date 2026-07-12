@@ -101,7 +101,7 @@
     font-size: 52px;
     font-weight: 700;
     line-height: 1;
-    color: #0f3a8f;
+    color: #1052d6;
   }
 
   #wx-feels {
@@ -256,7 +256,7 @@
         document.getElementById("wx-content").style.display = "block";
       })
       .catch(function (e) {
-        document.getElementById("wx-loading").textContent = "⚠ Kunde inte hämta väderdata";
+        document.getElementById("wx-loading").textContent = "⚠ Kunde inte hämta väderdata" + (e.message ? ": " + e.message : "");
         console.error("Weather widget error:", e);
       });
   }
